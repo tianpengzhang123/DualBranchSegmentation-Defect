@@ -1,0 +1,27 @@
+382729.00  535097   499900  34373  00
+246541       535097   1066     35512    1156
+
+
+1745974
+e
+
+AFFM的输入为高级特征图Fhigh(H/2,W/2,2C)和低级特征图Flow(H,W,C),输出为Fout(H,W,C)。
+首先对输入的高级特征图进行全局平均池化后得到全局上下文信息，然后通过1x1卷积得到作为低层特征的加权指导向量（1，1，C）,将加权指导向量
+与flow相乘得到Flow'(H,W,C)。
+为了的到流信息flow，将高级特征图首先通过1x1卷积调整为（H/2,W/2,C）      之后经过1x1卷积和上采样操作得到特征图(H,W,C/2), 
+同时对低级特征图进行1x1卷积后得到特征图(H,W,C/2),之后将两个特征图concat之后送入3*3卷积得到流信息flow,使用warp操作根据flow信息对Fhigh重采样，
+得到新的要融合的特征图Fhigh'(H,W,C)
+Flow'=Conv1x1(GAP(Fhigh))*Flow
+Fmidhigh=Conv1x1(Fhigh)
+flow=Conv3*3(Concat(Conv1x1(Flow),Up(Conv1x1(Fmidhigh)))
+Fhigh'=wrap(Fmidhigh,flow)
+Fout=Flow'+Fhigh'
+$\mathbb{F}_{out} \in \mathbb{R}^{H \times W \times C}$	
+
+
+
+
+exp4_num_20426.png
+
+
+VAE
